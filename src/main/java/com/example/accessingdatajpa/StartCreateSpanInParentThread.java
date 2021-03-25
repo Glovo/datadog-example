@@ -11,24 +11,24 @@ public class StartCreateSpanInParentThread {
     public static void main(String[] args) throws InterruptedException {
         Tracer openTracer = io.opentracing.util.GlobalTracer.get();
         ScopeManager scopeManager = openTracer.scopeManager();
-        System.out.println("active span: " + openTracer.scopeManager().activeSpan());
+        System.out.println("active span: " + openTracer.activeSpan());
 
         SpanBuilder builder = openTracer.buildSpan("root");
         Span rootSpan = builder.ignoreActiveSpan().start();
-        Scope scope = scopeManager.activate(rootSpan);
+        Scope scope = scopeManager.activate(rootSpan, true);
 
-        System.out.println("active span: " + openTracer.scopeManager().activeSpan());
+        System.out.println("active span: " + openTracer.activeSpan());
 
         SpanBuilder builder2 = openTracer.buildSpan("span-to-be-closed-in-another-thread");
         Span span = builder2./*asChildOf(rootSpan).*/start();
-        System.out.println("active span: " + openTracer.scopeManager().activeSpan());
+        System.out.println("active span: " + openTracer.activeSpan());
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("active span thread: " + openTracer.scopeManager().activeSpan());
+            System.out.println("active span thread: " + openTracer.activeSpan());
             span.finish();
         });
 

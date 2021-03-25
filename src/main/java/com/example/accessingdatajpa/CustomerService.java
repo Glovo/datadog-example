@@ -3,8 +3,8 @@ package com.example.accessingdatajpa;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer.SpanBuilder;
+import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomerService {
@@ -34,7 +34,7 @@ public class CustomerService {
         SpanBuilder spanBuilder = openTracer.buildSpan("parallel-no-tx2");
         spanBuilder.asChildOf(parentSpan);
         Span span = spanBuilder.start();
-        Scope scope = openTracer.activateSpan(span);
+        Scope scope = openTracer.scopeManager().activate(span, false);
         span.setBaggageItem("name", "parallel-no-tx2");
         parallelMethodImpl();
         span.finish();
