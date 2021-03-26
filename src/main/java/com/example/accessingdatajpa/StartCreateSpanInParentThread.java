@@ -9,6 +9,13 @@ import io.opentracing.Tracer.SpanBuilder;
 public class StartCreateSpanInParentThread {
 
     public static void main(String[] args) throws InterruptedException {
+        testClose(true);
+        testClose(false);
+    }
+
+    private static void testClose(boolean closeInTheSameThread) throws InterruptedException {
+
+        System.out.println("\nrunning with close in the same thread: " + closeInTheSameThread);
         Tracer openTracer = io.opentracing.util.GlobalTracer.get();
         ScopeManager scopeManager = openTracer.scopeManager();
         System.out.println("active span: " + openTracer.scopeManager().activeSpan());
@@ -44,9 +51,9 @@ public class StartCreateSpanInParentThread {
         System.out.println("activeSpan: " + activeSpan);
         rootSpan.finish();
 
-        Runnable scopeCloseRunnable = () -> scope.close();
+        Runnable scopeCloseRunnable = scope::close;
 
-        if (true) {
+        if (closeInTheSameThread) {
             scopeCloseRunnable.run();
         } else {
             Thread thread1 = new Thread(scopeCloseRunnable);
